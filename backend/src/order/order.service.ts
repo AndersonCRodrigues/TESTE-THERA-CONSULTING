@@ -2,10 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import { Product } from '../product/model/product.model';
+import Product from 'src/product/model/product.model';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderItem } from './model/order-item.model';
-import { Order } from './model/order.model';
+import { OrderStatus } from './dto/order-status.enum';
+import OrderItem from './model/order-item.model';
+import Order from './model/order.model';
 
 @Injectable()
 export class OrderService {
@@ -105,7 +106,7 @@ export class OrderService {
         );
       }
 
-      if (createOrderDto.status === 'Concluído') {
+      if (createOrderDto.status === OrderStatus.COMPLETED) {
         await this.updateOrderStatus(order.id, 'Concluído', transaction);
       }
 
