@@ -6,20 +6,20 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Product } from '../../product/model/product.model';
-import { Order } from './order.model';
+import Product from 'src/product/model/product.model';
+import Order from './order.model';
 
 @Table({
   tableName: 'order_items',
   timestamps: true,
 })
-export class OrderItem extends Model {
+export default class OrderItem extends Model {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  declare id: number;
 
   @ForeignKey(() => Order)
   @Column({

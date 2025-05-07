@@ -1,17 +1,17 @@
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
-import { OrderItem } from './order-item.model';
+import OrderItem from './order-item.model';
 
 @Table({
   tableName: 'orders',
   timestamps: true,
 })
-export class Order extends Model {
+export default class Order extends Model {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  declare id: number;
 
   @Column({
     type: DataType.DECIMAL(10, 2),
