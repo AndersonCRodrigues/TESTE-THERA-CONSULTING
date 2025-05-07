@@ -10,32 +10,47 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { Order } from './model/order.model';
+import Order from './model/order.model';
 import { OrderService } from './order.service';
 
-@ApiTags('pedidos')
+@ApiTags('Pedidos')
 @Controller('pedidos')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os pedidos' })
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({
+    summary: 'Listar todos os pedidos',
+    description:
+      'Retorna uma lista com todos os pedidos cadastrados no sistema.',
+  })
+  @ApiOkResponse({
     description: 'Lista de pedidos retornada com sucesso',
+    type: [Order],
   })
   async findAll(): Promise<Order[]> {
     return this.orderService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Buscar pedido por ID' })
-  @ApiParam({ name: 'id', description: 'ID do pedido' })
-  @ApiResponse({ status: 200, description: 'Pedido encontrado com sucesso' })
-  @ApiResponse({ status: 404, description: 'Pedido não encontrado' })
+  @ApiOperation({
+    summary: 'Buscar pedido por ID',
+    description: 'Retorna os dados de um pedido específico com base no ID.',
+  })
+  @ApiParam({ name: 'id', description: 'ID do pedido', example: 1 })
+  @ApiOkResponse({ description: 'Pedido encontrado com sucesso', type: Order })
+  @ApiNotFoundResponse({ description: 'Pedido não encontrado' })
   async findOne(@Param('id') id: number): Promise<Order> {
     const order = await this.orderService.findOne(id);
     if (!order) {
@@ -45,36 +60,44 @@ export class OrderController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Criar um novo pedido' })
-  @ApiResponse({ status: 201, description: 'Pedido criado com sucesso' })
-  @ApiResponse({
-    status: 400,
+  @ApiOperation({
+    summary: 'Criar um novo pedido',
+    description:
+      'Cria um novo pedido com base nos produtos informados. O estoque será validado antes da criação.',
+  })
+  @ApiCreatedResponse({ description: 'Pedido criado com sucesso', type: Order })
+  @ApiBadRequestResponse({
     description: 'Dados inválidos ou estoque insuficiente',
   })
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
     try {
       return await this.orderService.create(createOrderDto);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException('Erro ao criar pedido: ' + error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erro desconhecido';
+      throw new BadRequestException('Erro ao criar pedido: ' + errorMessage);
     }
   }
 
   @Put(':id/status')
-  @ApiOperation({ summary: 'Atualizar o status de um pedido' })
-  @ApiParam({ name: 'id', description: 'ID do pedido' })
-  @ApiResponse({
-    status: 200,
-    description: 'Status do pedido atualizado com sucesso',
+  @ApiOperation({
+    summary: 'Atualizar o status de um pedido',
+    description:
+      'Atualiza o status de um pedido para "Pendente", "Concluído" ou "Cancelado".',
   })
-  @ApiResponse({
-    status: 400,
+  @ApiParam({ name: 'id', description: 'ID do pedido', example: 1 })
+  @ApiOkResponse({
+    description: 'Status do pedido atualizado com sucesso',
+    type: Order,
+  })
+  @ApiBadRequestResponse({
     description: 'Status inválido ou operação não permitida',
   })
-  @ApiResponse({ status: 404, description: 'Pedido não encontrado' })
+  @ApiNotFoundResponse({ description: 'Pedido não encontrado' })
   async updateStatus(
     @Param('id') id: number,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
@@ -92,8 +115,10 @@ export class OrderController {
       ) {
         throw error;
       }
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erro desconhecido';
       throw new BadRequestException(
-        'Erro ao atualizar status: ' + error.message,
+        'Erro ao atualizar status: ' + errorMessage,
       );
     }
   }
