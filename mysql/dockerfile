@@ -1,0 +1,12 @@
+FROM mysql:8.0
+
+ENV MYSQL_DATABASE=nestjs_app
+ENV MYSQL_ROOT_PASSWORD=root_password
+ENV MYSQL_USER=nestjs_user
+ENV MYSQL_PASSWORD=nestjs_password
+
+EXPOSE 3306
+
+VOLUME /var/lib/mysql
+
+CMD ["mysqld"]
