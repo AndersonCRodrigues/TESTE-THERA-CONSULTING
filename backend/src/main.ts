@@ -1,8 +1,23 @@
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 5000);
+
+  const config = new DocumentBuilder()
+    .setTitle('API de Gerenciamento de Pedidos e Produtos')
+    .setDescription(
+      'API RESTful para gerenciamento de produtos e pedidos. Permite criar, listar, editar e excluir produtos, bem como criar e listar pedidos com verificação de estoque e cálculo automático do total.',
+    )
+    .setVersion('1.0')
+    .addTag('Produtos', 'Operações relacionadas ao gerenciamento de produtos')
+    .addTag('Pedidos', 'Operações relacionadas ao gerenciamento de pedidos')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  await app.listen(5000);
 }
 void bootstrap();
