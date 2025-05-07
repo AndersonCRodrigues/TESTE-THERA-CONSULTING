@@ -17,7 +17,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
         models: [__dirname + '/../**/*.model.{ts,js}'],
         autoLoadModels: true,
         synchronize: true,
-        logging: configService.get('NODE_ENV') !== 'production',
+        logging: false,
       }),
     }),
   ],
