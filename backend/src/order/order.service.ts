@@ -28,6 +28,18 @@ export class OrderService {
     });
   }
 
+  async findOrdersByUserId(userId: number): Promise<Order[]> {
+    return this.orderModel.findAll({
+      where: { userId },
+      include: [
+        {
+          model: OrderItem,
+          include: [{ all: true }],
+        },
+      ],
+    });
+  }
+
   async findOne(id: number): Promise<Order> {
     const order = await this.orderModel.findByPk(id, {
       include: [
@@ -79,6 +91,7 @@ export class OrderService {
         {
           total_pedido: totalPedido,
           status: 'Pendente',
+          userId: createOrderDto.userId,
         },
         { transaction },
       );
@@ -137,7 +150,7 @@ export class OrderService {
           await this.productService.atualizarEstoque(
             item.productId,
             item.quantidade,
-            false, // decrementar estoque
+            false,
             transaction,
           );
         }

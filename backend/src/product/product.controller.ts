@@ -8,9 +8,11 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -20,6 +22,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import Product from './model/product.model';
@@ -27,6 +32,8 @@ import { ProductService } from './product.service';
 
 @ApiTags('Produtos')
 @Controller('produtos')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -66,6 +73,8 @@ export class ProductController {
   }
 
   @Post()
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiOperation({
     summary: 'Criar um novo produto',
     description:
@@ -84,6 +93,8 @@ export class ProductController {
   }
 
   @Put(':id')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiOperation({
     summary: 'Atualizar um produto existente',
     description:
@@ -108,6 +119,8 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiOperation({
     summary: 'Remover um produto',
     description: 'Remove um produto do sistema com base no ID.',

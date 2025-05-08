@@ -1,63 +1,49 @@
-// create-order.dto.ts
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
-  IsEnum,
   IsInt,
-  IsNotEmpty,
   IsOptional,
   IsPositive,
+  IsString,
   ValidateNested,
 } from 'class-validator';
-import { OrderStatus } from './order-status.enum';
 
 export class OrderItemDto {
   @ApiProperty({
     description: 'ID do produto',
     example: 1,
-    type: Number,
   })
-  @IsInt({ message: 'O ID do produto deve ser um número inteiro' })
-  @IsPositive({ message: 'O ID do produto deve ser um número positivo' })
-  @IsNotEmpty({ message: 'O ID do produto é obrigatório' })
+  @IsInt()
+  @IsPositive()
   productId: number;
 
   @ApiProperty({
     description: 'Quantidade do produto',
     example: 2,
-    type: Number,
   })
-  @IsInt({ message: 'A quantidade deve ser um número inteiro' })
-  @IsPositive({ message: 'A quantidade deve ser um número positivo' })
-  @IsNotEmpty({ message: 'A quantidade é obrigatória' })
+  @IsInt()
+  @IsPositive()
   quantidade: number;
 }
 
 export class CreateOrderDto {
   @ApiProperty({
-    description: 'Itens do pedido',
+    description: 'Lista de itens do pedido',
     type: [OrderItemDto],
-    example: [
-      { productId: 1, quantidade: 2 },
-      { productId: 3, quantidade: 1 },
-    ],
   })
-  @IsArray({ message: 'Os itens devem ser fornecidos em um array' })
+  @IsArray()
+  @ArrayMinSize(1, { message: 'Pedido deve ter pelo menos um item' })
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
-  @IsNotEmpty({ message: 'O pedido deve conter pelo menos um item' })
   items: OrderItemDto[];
 
-  @ApiPropertyOptional({
-    description: 'Status do pedido',
-    enum: OrderStatus,
-    default: OrderStatus.PENDING,
-    example: OrderStatus.PENDING,
+  @ApiProperty({
+    description: 'ID do usuário associado ao pedido',
+    required: false,
   })
-  @IsEnum(OrderStatus, {
-    message: 'Status deve ser Pendente, Concluído ou Cancelado',
-  })
+  @IsString()
   @IsOptional()
-  status?: OrderStatus = OrderStatus.PENDING;
+  userId?: number;
 }
