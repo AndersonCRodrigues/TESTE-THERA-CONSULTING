@@ -13,6 +13,12 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('Produtos', 'Operações relacionadas ao gerenciamento de produtos')
     .addTag('Pedidos', 'Operações relacionadas ao gerenciamento de pedidos')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      description: 'Entre com o JWT token',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
