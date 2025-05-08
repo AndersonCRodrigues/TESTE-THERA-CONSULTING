@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import User from '../user/model/user.model';
+import { AdminSeeder } from './seeders/admin.seeder';
 
 @Module({
   imports: [
@@ -19,6 +21,9 @@ import { SequelizeModule } from '@nestjs/sequelize';
         synchronize: true,
       }),
     }),
+    SequelizeModule.forFeature([User]),
   ],
+  providers: [AdminSeeder],
+  exports: [AdminSeeder],
 })
 export class DatabaseModule {}
