@@ -1,11 +1,9 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -17,6 +15,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -39,6 +38,10 @@ export class OrderController {
     description: 'Lista de pedidos retornada com sucesso',
     type: [Order],
   })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro interno do servidor',
+  })
   async findAll(): Promise<Order[]> {
     return this.orderService.findAll();
   }
@@ -52,11 +55,7 @@ export class OrderController {
   @ApiOkResponse({ description: 'Pedido encontrado com sucesso', type: Order })
   @ApiNotFoundResponse({ description: 'Pedido não encontrado' })
   async findOne(@Param('id') id: number): Promise<Order> {
-    const order = await this.orderService.findOne(id);
-    if (!order) {
-      throw new NotFoundException(`Pedido com ID ${id} não encontrado`);
-    }
-    return order;
+    return this.orderService.findOne(id);
   }
 
   @Post()
@@ -71,23 +70,14 @@ export class OrderController {
   })
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
-    try {
-      return await this.orderService.create(createOrderDto);
-    } catch (error: unknown) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      const errorMessage =
-        error instanceof Error ? error.message : 'Erro desconhecido';
-      throw new BadRequestException('Erro ao criar pedido: ' + errorMessage);
-    }
+    return this.orderService.create(createOrderDto);
   }
 
   @Put(':id/status')
   @ApiOperation({
     summary: 'Atualizar o status de um pedido',
     description:
-      'Atualiza o status de um pedido para "Pendente", "Concluído" ou "Cancelado".',
+      'Atualiza o status de um pedido para "Pendente", "Concluído" ou "Cancelado". Ajusta automaticamente o estoque de produtos conforme necessário.',
   })
   @ApiParam({ name: 'id', description: 'ID do pedido', example: 1 })
   @ApiOkResponse({
@@ -102,24 +92,6 @@ export class OrderController {
     @Param('id') id: number,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
   ): Promise<Order> {
-    try {
-      await this.orderService.updateOrderStatus(
-        id,
-        updateOrderStatusDto.status,
-      );
-      return this.orderService.findOne(id);
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
-        throw error;
-      }
-      const errorMessage =
-        error instanceof Error ? error.message : 'Erro desconhecido';
-      throw new BadRequestException(
-        'Erro ao atualizar status: ' + errorMessage,
-      );
-    }
+    return this.orderService.updateOrderStatus(id, updateOrderStatusDto.status);
   }
 }

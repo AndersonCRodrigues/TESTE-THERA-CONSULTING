@@ -18,15 +18,15 @@ export default class Order extends Model {
     allowNull: false,
     defaultValue: 0,
   })
-  total_pedido: number;
+  declare total_pedido: number;
 
   @Column({
     type: DataType.ENUM('Pendente', 'Concluído', 'Cancelado'),
     allowNull: false,
     defaultValue: 'Pendente',
   })
-  status: 'Pendente' | 'Concluído' | 'Cancelado';
+  declare status: 'Pendente' | 'Concluído' | 'Cancelado';
 
   @HasMany(() => OrderItem)
-  items: OrderItem[];
+  declare items: OrderItem[];
 }

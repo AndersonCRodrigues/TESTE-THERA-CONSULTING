@@ -1,10 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import Product from 'src/product/model/product.model';
+import { ProductService } from '../product/product.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderStatus } from './dto/order-status.enum';
 import OrderItem from './model/order-item.model';
 import Order from './model/order.model';
 
@@ -15,8 +13,7 @@ export class OrderService {
     private orderModel: typeof Order,
     @InjectModel(OrderItem)
     private orderItemModel: typeof OrderItem,
-    @InjectModel(Product)
-    private productModel: typeof Product,
+    private productService: ProductService,
     private sequelize: Sequelize,
   ) {}
 
@@ -25,7 +22,7 @@ export class OrderService {
       include: [
         {
           model: OrderItem,
-          include: [Product],
+          include: [{ all: true }],
         },
       ],
     });
@@ -36,13 +33,13 @@ export class OrderService {
       include: [
         {
           model: OrderItem,
-          include: [Product],
+          include: [{ all: true }],
         },
       ],
     });
 
     if (!order) {
-      throw new BadRequestException(`Pedido com ID ${id} não encontrado`);
+      throw new NotFoundException(`Pedido com ID ${id} não encontrado`);
     }
 
     return order;
@@ -61,21 +58,11 @@ export class OrderService {
       }[] = [];
 
       for (const item of createOrderDto.items) {
-        const product = await this.productModel.findByPk(item.productId, {
+        const product = await this.productService.verificarEstoque(
+          item.productId,
+          item.quantidade,
           transaction,
-        });
-
-        if (!product) {
-          throw new BadRequestException(
-            `Produto com ID ${item.productId} não encontrado`,
-          );
-        }
-
-        if (product.quantidade_estoque < item.quantidade) {
-          throw new BadRequestException(
-            `Estoque insuficiente para o produto ${product.nome}. Disponível: ${product.quantidade_estoque}`,
-          );
-        }
+        );
 
         const subtotal = product.preco * item.quantidade;
         totalPedido += subtotal;
@@ -106,15 +93,12 @@ export class OrderService {
         );
       }
 
-      if (createOrderDto.status === OrderStatus.COMPLETED) {
-        await this.updateOrderStatus(order.id, 'Concluído', transaction);
-      }
-
       await transaction.commit();
 
       return this.findOne(order.id);
     } catch (error) {
       await transaction.rollback();
+      console.error('Erro ao criar pedido:', error);
       throw error;
     }
   }
@@ -122,48 +106,60 @@ export class OrderService {
   async updateOrderStatus(
     orderId: number,
     status: 'Pendente' | 'Concluído' | 'Cancelado',
-    transaction?: Transaction,
-  ): Promise<void> {
-    const t = transaction || (await this.sequelize.transaction());
+  ): Promise<Order> {
+    const transaction = await this.sequelize.transaction();
 
     try {
       const order = await this.orderModel.findByPk(orderId, {
         include: [OrderItem],
-        transaction: t,
+        transaction,
       });
 
       if (!order) {
-        throw new BadRequestException(
-          `Pedido com ID ${orderId} não encontrado`,
-        );
+        await transaction.rollback();
+        throw new NotFoundException(`Pedido com ID ${orderId} não encontrado`);
       }
 
+      if (order.status === status) {
+        console.log(
+          `Status do pedido ${orderId} já é ${status}. Nenhuma mudança necessária.`,
+        );
+        await transaction.commit();
+        return order;
+      }
+
+      const previousStatus = order.status;
       order.status = status;
-      await order.save({ transaction: t });
+      await order.save({ transaction });
 
-      if (status === 'Concluído') {
+      if (status === 'Concluído' && previousStatus !== 'Concluído') {
         for (const item of order.items) {
-          const product = await this.productModel.findByPk(item.productId, {
-            transaction: t,
-          });
-
-          if (!product) {
-            throw new BadRequestException(
-              `Produto com ID ${item.productId} não encontrado durante a atualização do estoque`,
-            );
-          }
-          product.quantidade_estoque -= item.quantidade;
-          await product.save({ transaction: t });
+          await this.productService.atualizarEstoque(
+            item.productId,
+            item.quantidade,
+            false, // decrementar estoque
+            transaction,
+          );
+        }
+      } else if (status === 'Cancelado' && previousStatus === 'Concluído') {
+        for (const item of order.items) {
+          await this.productService.atualizarEstoque(
+            item.productId,
+            item.quantidade,
+            true,
+            transaction,
+          );
         }
       }
 
-      if (!transaction) {
-        await t.commit();
-      }
+      await transaction.commit();
+      return this.findOne(orderId);
     } catch (error) {
-      if (!transaction) {
-        await t.rollback();
-      }
+      await transaction.rollback();
+      console.error(
+        `Erro ao atualizar status do pedido ${orderId} para ${status}:`,
+        error,
+      );
       throw error;
     }
   }

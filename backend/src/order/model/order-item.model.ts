@@ -26,36 +26,36 @@ export default class OrderItem extends Model {
     type: DataType.INTEGER,
     allowNull: false,
   })
-  orderId: number;
+  declare orderId: number;
 
   @ForeignKey(() => Product)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  productId: number;
+  declare productId: number;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  quantidade: number;
+  declare quantidade: number;
 
   @Column({
     type: DataType.DECIMAL(10, 2),
     allowNull: false,
   })
-  preco_unitario: number;
+  declare preco_unitario: number;
 
   @Column({
     type: DataType.DECIMAL(10, 2),
     allowNull: false,
   })
-  subtotal: number;
+  declare subtotal: number;
 
   @BelongsTo(() => Order)
-  order: Order;
+  declare order: Order;
 
   @BelongsTo(() => Product)
-  product: Product;
+  declare product: Product;
 }
