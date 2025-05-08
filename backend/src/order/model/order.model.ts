@@ -1,4 +1,13 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import User from 'src/user/model/user.model';
 import OrderItem from './order-item.model';
 
 @Table({
@@ -12,6 +21,16 @@ export default class Order extends Model {
     primaryKey: true,
   })
   declare id: number;
+
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  declare userId: number;
+
+  @BelongsTo(() => User)
+  declare user: User;
 
   @Column({
     type: DataType.DECIMAL(10, 2),
