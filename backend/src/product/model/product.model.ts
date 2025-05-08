@@ -17,33 +17,33 @@ export default class Product extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  nome: string;
+  declare nome: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  categoria: string;
+  declare categoria: string;
 
   @Column({
     type: DataType.TEXT,
     allowNull: true,
   })
-  descricao: string;
+  declare descricao: string;
 
   @Column({
     type: DataType.DECIMAL(10, 2),
     allowNull: false,
   })
-  preco: number;
+  declare preco: number;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
     defaultValue: 0,
   })
-  quantidade_estoque: number;
+  declare quantidade_estoque: number;
 
   @HasMany(() => OrderItem)
-  orderItems: OrderItem[];
+  declare orderItems: OrderItem[];
 }
