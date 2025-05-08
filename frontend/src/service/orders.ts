@@ -1,26 +1,26 @@
-import { Order } from '@/types/order';
+import { Order, OrderInput } from '../types/order';
 import { api } from './api';
 
 export const getOrders = async (): Promise<Order[]> => {
-  const res = await api.get('/orders');
-  return res.data;
+  const response = await api.get<Order[]>('/orders');
+  return response.data;
 };
 
-export const getOrderById = async (id: number): Promise<Order> => {
-  const res = await api.get(`/orders/${id}`);
-  return res.data;
+export const getOrderById = async (id: string): Promise<Order> => {
+  const response = await api.get<Order>(`/orders/${id}`);
+  return response.data;
 };
 
-export const createOrder = async (order: Partial<Order>): Promise<Order> => {
-  const res = await api.post('/orders', order);
-  return res.data;
+export const createOrder = async (order: OrderInput): Promise<Order> => {
+  const response = await api.post<Order>('/orders', order);
+  return response.data;
 };
 
-export const updateOrder = async (id: number, data: Partial<Order>): Promise<Order> => {
-  const res = await api.put(`/orders/${id}`, data);
-  return res.data;
+export const updateOrderStatus = async (id: string, status: string): Promise<Order> => {
+  const response = await api.patch<Order>(`/orders/${id}/status`, { status });
+  return response.data;
 };
 
-export const deleteOrder = async (id: number): Promise<void> => {
+export const deleteOrder = async (id: string): Promise<void> => {
   await api.delete(`/orders/${id}`);
 };

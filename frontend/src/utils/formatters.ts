@@ -1,16 +1,26 @@
-export function formatCurrency(value: number | string, locale = 'pt-BR', currency = 'BRL'): string {
-  const number = typeof value === 'string' ? parseFloat(value) : value;
-  return new Intl.NumberFormat(locale, {
+export const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency,
-  }).format(number);
-}
+    currency: 'BRL',
+  }).format(value);
+};
 
-export function formatDate(dateStr: string, locale = 'pt-BR'): string {
+export const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString(locale);
-}
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+};
 
-export function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+export const formatDateTime = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
