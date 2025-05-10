@@ -1,7 +1,4 @@
-import {
-  HttpStatus,
-  NotFoundException
-} from '@nestjs/common';
+import { HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -75,15 +72,12 @@ describe('ProductController', () => {
 
   describe('create', () => {
     it('should create a new product and return it', async () => {
-      // Adicionadas propriedades 'categoria' e 'quantidade_estoque' conforme erro TS2739
       const createProductDto: CreateProductDto = {
         nome: 'Novo Produto',
         preco: 10,
         categoria: 'Eletrônicos', // Exemplo, ajuste conforme seu DTO
         quantidade_estoque: 5, // Exemplo, ajuste conforme seu DTO
-        // Adicione outras propriedades obrigatórias do CreateProductDto se houver
       };
-      // Usado 'any' para o mock de retorno para evitar erro TS2352
       const result: any = {
         id: 1,
         ...createProductDto,

@@ -130,8 +130,8 @@ ADMIN_PASSWORD=Admin@123
 docker-compose up --build
 ```
 
-A API estará disponível em: `http://localhost:3000`
-Documentação Swagger: `http://localhost:3000/api`
+A API estará disponível em: `http://localhost:5000`
+Documentação Swagger: `http://localhost:5000/api`
 
 ## 🔐 Variáveis de Ambiente
 
@@ -149,15 +149,13 @@ Documentação Swagger: `http://localhost:3000/api`
 
 ## 📚 Rotas da API
 
-Prefixo base da API: `/api`
-
-### 🔑 Auth (`/api/auth`)
+### 🔑 Auth (`/auth`)
 
 | Método | Rota    | Ação             |
 |--------|---------|------------------|
 | POST   | /login  | Login do usuário |
 
-### 👤 Users (`/api/users`)
+### 👤 Users (`/usuarios`)
 
 | Método | Rota  | Ação                      |
 |--------|-------|---------------------------|
@@ -167,7 +165,7 @@ Prefixo base da API: `/api`
 | PUT    | /:id  | Atualizar dados do usuário|
 | DELETE | /:id  | Remover usuário           |
 
-### 📦 Products (`/api/products`)
+### 📦 Products (`/produtos`)
 
 | Método | Rota  | Ação                    |
 |--------|-------|-------------------------|
@@ -177,7 +175,7 @@ Prefixo base da API: `/api`
 | PUT    | /:id  | Atualizar produto       |
 | DELETE | /:id  | Deletar produto         |
 
-### 🧾 Orders (`/api/orders`)
+### 🧾 Orders (`/pedidos`)
 
 | Método | Rota  | Ação                    |
 |--------|-------|-------------------------|
